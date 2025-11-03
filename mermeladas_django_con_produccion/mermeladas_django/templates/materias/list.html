@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Materias primas{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Materias primas</h2>
+  <a href="{% url 'materia_create' %}" class="btn btn-primary">Nueva materia prima</a>
+</div>
+<table class="table table-striped">
+  <thead><tr><th>Nombre</th><th>Unidad</th><th>Costo (CLP)</th><th>Stock</th><th></th></tr></thead>
+  <tbody>
+  {% for m in materias %}
+    <tr>
+      <td>{{ m.nombre }}</td>
+      <td>{{ m.get_unidad_display }}</td>
+      <td>${{ m.costo_unitario }}</td>
+      <td>{{ m.stock|floatformat:0 }}</td>
+      <td>
+        <a href="{% url 'materia_update' m.pk %}" class="btn btn-sm btn-warning">Editar</a>
+        <a href="{% url 'materia_delete' m.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5" class="text-center">Sin materias primas</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

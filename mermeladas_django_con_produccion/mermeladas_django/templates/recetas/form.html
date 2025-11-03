@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% block title %}Receta{% endblock %}
+{% block content %}
+<h2>{{ form.instance.pk|yesno:"Editar receta,Nueva receta" }}</h2>
+{% if form.errors or formset.non_form_errors %}
+<div class="alert alert-danger">
+  <strong>Revisa los errores del formulario:</strong>
+  {{ form.non_field_errors }}
+  {{ formset.non_form_errors }}
+</div>
+{% endif %}
+
+<form method="post">{% csrf_token %}
+  <div class="card mb-3">
+    <div class="card-body">
+      {{ form.as_p }}
+    </div>
+  </div>
+
+  <h5>Ingredientes</h5>
+
+  {{ formset.management_form }}
+  <table class="table" id="tabla-insumos">
+    <thead>
+      <tr>
+        <th>Materia prima</th>
+        <th style="width:220px">Cantidad</th>
+        <th style="width:120px">Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="formset-body">
+      {% for f in formset %}
+      <tr class="insumo-row">
+        <td>
+          {{ f.id }} {{ f.materia_prima }}
+        </td>
+        <td>
+          <div class="d-flex gap-2 align-items-center">
+            {{ f.cantidad }}
+            <span class="badge bg-secondary unidad-badge"></span>
+          </div>
+        </td>
+        <td>
+          <span class="d-none">{{ f.DELETE }}</span>
+          <button type="button" class="btn btn-sm btn-outline-danger btn-remove">Quitar</button>
+        </td>
+      </tr>
+      {% if f.errors %}
+      <tr><td colspan="3"><div class="text-danger small">{{ f.errors }}</div></td></tr>
+      {% endif %}
+      {% empty %}
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="mb-3">
+    <button id="add-row-producto" type="button" class="btn btn-outline-success">+ Agregar ingrediente</button>
+  </div>
+
+  <button class="btn btn-primary">Guardar</button>
+  <a href="{% url 'recetas_list' %}" class="btn btn-secondary">Volver</a>
+
+</form>
+
+<script type="text/template" id="empty-row-template">
+  <tr class="insumo-row">
+    <td>
+      {{ formset.empty_form.id }} {{ formset.empty_form.materia_prima }}
+    </td>
+    <td>
+      <div class="d-flex gap-2 align-items-center">
+        {{ formset.empty_form.cantidad }}
+        <span class="badge bg-secondary unidad-badge"></span>
+      </div>
+    </td>
+    <td>
+      <span class="d-none">{{ formset.empty_form.DELETE }}</span>
+      <button type="button" class="btn btn-sm btn-outline-danger btn-remove">Quitar</button>
+    </td>
+  </tr>
+</script>
+
+<script>
+(function() {
+  // Mapa idMateriaPrima -> unidad legible (inyectado desde la vista)
+  const UNIDADES = {{ unidades|safe }};
+
+  const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
+  const formsetBody     = document.getElementById('formset-body');
+  const addBtn          = document.getElementById('add-row-producto');
+  const templateHTML    = document.getElementById('empty-row-template').textContent;
+
+  function paintUnit(row){
+    const sel   = row.querySelector('select[name$="-materia_prima"]');
+    const badge = row.querySelector('.unidad-badge');
+    const id    = sel && sel.value;
+    badge.textContent = (id && UNIDADES[id]) ? UNIDADES[id] : "";
+  }
+
+  function bindRow(row){
+    // Aplicar clases de Bootstrap a los campos del formset
+    const selMateria = row.querySelector('select[name$="-materia_prima"]');
+    const inputCant = row.querySelector('input[name$="-cantidad"]');
+
+    if (selMateria) selMateria.classList.add('form-select', 'form-select-sm');
+    if (inputCant) inputCant.classList.add('form-control', 'form-control-sm');
+
+    // unidad dinámica
+    row.addEventListener('change', function(e){
+      if (e.target.matches('select[name$="-materia_prima"]')) paintUnit(row);
+    });
+
+    // botón quitar
+    const delChk = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+    const btnDel = row.querySelector('.btn-remove');
+    if (btnDel) {
+      btnDel.addEventListener('click', function(){
+        if (delChk) {
+          delChk.checked = true;
+          row.style.display = 'none';
+        } else {
+          row.remove();
+          renumerar();
+        }
+      });
+    }
+    // pinta unidad al cargar
+    paintUnit(row);
+  }
+
+  function addRow(){
+    const index = parseInt(totalFormsInput.value || "0");
+    const html  = templateHTML.replace(/__prefix__/g, index);
+    const tmp   = document.createElement('tbody');
+    tmp.innerHTML = html.trim();
+    const row   = tmp.firstElementChild;
+    formsetBody.appendChild(row);
+    totalFormsInput.value = index + 1;
+    bindRow(row);
+  }
+
+  function renumerar(){
+    const rows = formsetBody.querySelectorAll('tr.insumo-row');
+    let i = 0;
+    rows.forEach(r => {
+      if (r.style.display === 'none') return;
+
+      r.querySelectorAll('input, select, textarea, label').forEach(el => {
+        ['name','id','for'].forEach(attr => {
+          if (el.hasAttribute && el.hasAttribute(attr)) {
+            el.setAttribute(attr, el.getAttribute(attr).replace(/(.*-)\d+(-.*)/, '$1' + i + '$2'));
+          }
+        });
+      });
+      i++;
+    });
+    totalFormsInput.value = i;
+  }
+
+  // enlaza filas existentes (si hay)
+  document.querySelectorAll('tr.insumo-row').forEach(bindRow);
+
+  // botón agregar
+  if (addBtn) addBtn.addEventListener('click', addRow);
+})();
+</script>
+
+<script>
+(function() {
+  // Estiliza el formulario principal (el de la tarjeta)
+  document.querySelectorAll('form > .card .card-body p').forEach(p => {
+    const label = p.querySelector('label');
+    const input = p.querySelector('input, select, textarea');
+
+    if (label && input) {
+      p.classList.add('mb-3');
+      label.classList.add('form-label');
+
+      if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
+        if (input.tagName === 'SELECT') {
+          input.classList.add('form-select');
+        } else {
+          input.classList.add('form-control');
+        }
+      }
+
+      const error = p.querySelector('.errorlist');
+      if (error) {
+        error.querySelectorAll('li').forEach(li => {
+          const errorDiv = document.createElement('div');
+          errorDiv.classList.add('invalid-feedback', 'd-block');
+          errorDiv.textContent = li.textContent;
+          input.after(errorDiv);
+        });
+        input.classList.add('is-invalid');
+        error.remove();
+      }
+
+      const div = document.createElement('div');
+      div.innerHTML = p.innerHTML;
+      Array.from(p.attributes).forEach(attr => div.setAttribute(attr.name, attr.value));
+      p.replaceWith(div);
+    }
+  });
+})();
+</script>
+{% endblock %}

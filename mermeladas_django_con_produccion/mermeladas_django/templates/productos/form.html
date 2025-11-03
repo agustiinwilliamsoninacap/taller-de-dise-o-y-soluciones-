@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Producto{% endblock %}
+{% block content %}
+<h2>{{ form.instance.pk|yesno:"Editar producto,Crear producto" }}</h2>
+<form method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary">Guardar</button>
+  <a href="{% url 'productos_list' %}" class="btn btn-secondary">Volver</a>
+</form>
+{% endblock %}

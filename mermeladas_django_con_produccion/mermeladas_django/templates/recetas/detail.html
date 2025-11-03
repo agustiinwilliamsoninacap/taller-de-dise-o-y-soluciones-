@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Detalle receta{% endblock %}
+{% block content %}
+<h2>{{ receta.nombre }}</h2>
+<p><strong>Producto final:</strong> {{ receta.producto_final }} | <strong>Rinde:</strong> {{ receta.rendimiento_unidades }}</p>
+<p>
+  <a href="{% url 'receta_update' receta.pk %}" class="btn btn-sm btn-warning">Editar receta</a>
+  <a href="{% url 'receta_producir' receta.pk %}" class="btn btn-sm btn-success">Producir</a>
+</p>
+<h5>Ingredientes</h5>
+<table class="table table-sm">
+  <thead><tr><th>Materia prima</th><th>Cantidad</th></tr></thead>
+  <tbody>
+  {% for i in receta.items.all %}
+    <tr><td>{{ i.materia_prima }}</td><td>{{ i.cantidad }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><strong>Costo estándar estimado:</strong> ${{ receta.costo_estandar }}</p>
+{% endblock %}

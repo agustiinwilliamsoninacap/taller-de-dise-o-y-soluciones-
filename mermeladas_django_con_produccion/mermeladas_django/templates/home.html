@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Inicio{% endblock %}
+
+{% block page_title %}
+  <i class="bi bi-speedometer2 me-2"></i>Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+<h5 class="mb-3">Resumen General</h5>
+<div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+
+  <div class="col">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="fs-1 text-primary me-3">
+            <i class="bi bi-box2"></i>
+          </div>
+          <div>
+            <h6 class="card-title text-muted mb-1">Productos</h6>
+            <div class="fs-3 fw-bold">{{ total_productos }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="fs-1 text-success me-3">
+            <i class="bi bi-people"></i>
+          </div>
+          <div>
+            <h6 class="card-title text-muted mb-1">Clientes</h6>
+            <div class="fs-3 fw-bold">{{ total_clientes }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body">
+        <div class="d-flex align-items-center">
+          <div class="fs-1 text-info me-3">
+            <i class="bi bi-cash-coin"></i>
+          </div>
+          <div>
+            <h6 class="card-title text-muted mb-1">Ventas</h6>
+            <div class="fs-3 fw-bold">{{ total_ventas }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h5 class="mb-3">Accesos Rápidos</h5>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-0">
+        <div class="list-group list-group-flush">
+          <a href="{% url 'venta_create' %}" class="list-group-item list-group-item-action fs-5 py-3">
+            <i class="bi bi-plus-circle-fill me-2 text-success"></i>Registrar Nueva Venta
+          </a>
+          <a href="{% url 'receta_create' %}" class="list-group-item list-group-item-action fs-5 py-3">
+            <i class="bi bi-journal-plus me-2 text-warning"></i>Crear Nueva Receta
+          </a>
+          <a href="{% url 'productos_list' %}" class="list-group-item list-group-item-action fs-5 py-3">
+            <i class="bi bi-search me-2 text-primary"></i>Consultar Productos
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

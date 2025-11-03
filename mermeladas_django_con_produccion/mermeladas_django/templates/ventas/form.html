@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% block title %}Nueva venta{% endblock %}
+
+{% block page_title %}
+  <i class="bi bi-plus-circle-fill me-2"></i>Nueva venta
+{% endblock %}
+
+{% block content %}
+
+<form method="post" id="venta-form">{% csrf_token %}
+  <div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+      {{ form.as_p }}
+      <small class="text-muted">
+        * Cliente puede quedar vacío (venta sin cliente). Si eliges <strong>Efectivo</strong>, ingresa "Monto pagado".
+      </small>
+    </div>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-white">
+      <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>Ítems</h5>
+    </div>
+    <div class="card-body">
+      {{ formset.management_form }}
+      <div class="table-responsive">
+        <table class="table" id="tabla-items">
+          <thead class="table-light">
+            <tr>
+              <th style="width:35%">Producto</th>
+              <th style="width:15%">Stock disp.</th>
+              <th style="width:15%">Cantidad</th>
+              <th style="width:15%">Precio unit. (CLP)</th>
+              <th style="width:15%">Subtotal</th>
+              <th style="width:5%">Elim.</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for f in formset %}
+            <tr class="venta-row">
+              <td>
+                {{ f.id }} {{ f.producto }}
+              </td>
+              <td class="stock-disp text-muted fw-bold">--</td>
+              <td>{{ f.cantidad }}</td>
+              <td>{{ f.precio_unitario }}</td>
+              <td class="subtotal fw-bold">$0</td>
+              <td>{{ f.DELETE }}</td>
+            </tr>
+            {% if f.errors %}
+            <tr><td colspan="6"><div class="text-danger small">{{ f.errors }}</div></td></tr>
+            {% endif %}
+          {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="4" class="text-end fs-5">TOTAL</th>
+              <th id="total-general" class="fs-5">$0</th>
+              <th></th>
+            </tr>
+            <tr>
+              <td colspan="6" class="text-end small text-muted">
+                * El stock se descuenta por FEFO (vencimiento más próximo).
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      </div>
+  </div>
+
+  <div class="mt-4">
+    <button class="btn btn-primary">
+      <i class="bi bi-save me-1"></i>Guardar venta
+    </button>
+    <a href="{% url 'ventas_list' %}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Volver
+    </a>
+  </div>
+</form>
+
+<script>
+  (function(){
+    // Diccionarios desde la vista
+    const PRECIOS = {{ precios|safe }};
+
+    // --- CORRECCIÓN AQUÍ ---
+    // Se cambió 'stocks' por 'stock_map' para que coincida con la vista
+    const STOCKS  = {{ stock_map|safe }};
+    // --- FIN DE LA CORRECCIÓN ---
+
+    function parseIntSafe(v){ v=(v||"").toString().replace(/\./g,'').replace(/,/g,'.'); return Math.max(0, Math.floor(Number(v)||0)); }
+    function parseFloatSafe(v){ v=(v||"").toString().replace(/\./g,'').replace(/,/g,'.'); return Number(v)||0; }
+    function money(n){ n = Math.round(n)||0; return "$"+ n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+
+    function bindRow(row){
+      const sel=row.querySelector('select[name$="-producto"]');
+      const stockTd=row.querySelector('.stock-disp');
+      const qty=row.querySelector('input[name$="-cantidad"]');
+      const price=row.querySelector('input[name$="-precio_unitario"]');
+      const sub=row.querySelector('.subtotal');
+      const del=row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+
+      // --- MEJORA: Aplicar estilos Bootstrap ---
+      if(sel){ sel.classList.add('form-select', 'form-select-sm'); }
+      if(qty){ qty.classList.add('form-control', 'form-control-sm'); }
+      if(price){ price.classList.add('form-control', 'form-control-sm'); }
+      if(del){ del.classList.add('form-check-input'); }
+      // --- FIN MEJORA ---
+
+      function updateStockAndPrice(){
+        const id = sel.value;
+        // precio por defecto
+        if(id && PRECIOS[id] !== undefined && (!price.value || Number(price.value)==0)){
+          price.value = PRECIOS[id];
+        }
+        // stock disponible
+        stockTd.textContent = id && STOCKS[id] !== undefined ? STOCKS[id] : "--";
+        updateSubtotal();
+      }
+
+      function updateSubtotal(){
+        const p = parseIntSafe(price.value);
+        const c = parseFloatSafe(qty.value);
+        const s = (del && del.checked) ? 0 : p * c; // No sumar si está marcado para borrar
+        sub.textContent = money(s);
+        updateTotal();
+      }
+
+      if(sel){ sel.addEventListener('change', updateStockAndPrice); }
+      if(qty){ qty.addEventListener('input', updateSubtotal); }
+      if(price){ price.addEventListener('input', updateSubtotal); }
+      if(del){ del.addEventListener('change', updateSubtotal); }
+
+      // init
+      updateStockAndPrice();
+    }
+
+    function updateTotal(){
+      let total = 0;
+      document.querySelectorAll('#tabla-items .subtotal').forEach(td=>{
+        const val = (td.textContent||"").replace(/[^0-9]/g,'');
+        total += parseInt(val || "0",10);
+      });
+      document.getElementById('total-general').textContent = money(total);
+
+      // Si hay campo monto_pagado, muestra el vuelto estimado
+      const metodo = document.getElementById('id_metodo_pago');
+      const pagado = document.getElementById('id_monto_pagado');
+      const pagadoDiv = pagado ? pagado.closest('.mb-3') : null;
+
+      if(metodo && pagado && metodo.value === "EFECTIVO"){
+        if(pagadoDiv) pagadoDiv.style.display = 'block'; // Mostrar campo
+        const vuelto = parseIntSafe(pagado.value) - total;
+        // Crear o encontrar el div de ayuda
+        let helpDiv = pagado.parentElement.querySelector('.form-text');
+        if (!helpDiv) {
+          helpDiv = document.createElement('div');
+          helpDiv.className = 'form-text';
+          pagado.after(helpDiv);
+        }
+
+        if (parseIntSafe(pagado.value) > 0) {
+            helpDiv.textContent = vuelto >= 0 ? ("Vuelto estimado: " + money(vuelto)) : "Monto insuficiente";
+            helpDiv.className = vuelto >= 0 ? 'form-text text-success' : 'form-text text-danger';
+        } else {
+            helpDiv.textContent = '';
+        }
+
+      } else if(pagado) {
+        if(pagadoDiv) pagadoDiv.style.display = 'none'; // Ocultar campo
+        let helpDiv = pagado.parentElement.querySelector('.form-text');
+        if (helpDiv) helpDiv.textContent = ''; // Limpiar ayuda
+      }
+    }
+
+    // Bindear todas las filas existentes
+    document.querySelectorAll('#tabla-items tr.venta-row').forEach(bindRow);
+
+    const metodoSel = document.getElementById('id_metodo_pago');
+    const pagadoInp = document.getElementById('id_monto_pagado');
+    if(metodoSel){ metodoSel.addEventListener('change', updateTotal); }
+    if(pagadoInp){ pagadoInp.addEventListener('input', updateTotal); }
+
+    // Ejecutar al inicio
+    updateTotal();
+  })();
+</script>
+
+<script>
+(function() {
+  // Estiliza el formulario principal (el de la tarjeta)
+  document.querySelectorAll('form#venta-form > div.card .card-body p').forEach(p => {
+    const label = p.querySelector('label');
+    const input = p.querySelector('input, select, textarea');
+
+    if (label && input) {
+      p.classList.add('mb-3');
+      label.classList.add('form-label');
+
+      if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
+        if (input.tagName === 'SELECT') {
+          input.classList.add('form-select');
+        } else {
+          input.classList.add('form-control');
+        }
+      }
+
+      const error = p.querySelector('.errorlist');
+      if (error) {
+        error.querySelectorAll('li').forEach(li => {
+          const errorDiv = document.createElement('div');
+          errorDiv.classList.add('invalid-feedback', 'd-block');
+          errorDiv.textContent = li.textContent;
+          input.after(errorDiv);
+        });
+        input.classList.add('is-invalid');
+        error.remove();
+      }
+
+      const div = document.createElement('div');
+      div.innerHTML = p.innerHTML;
+      Array.from(p.attributes).forEach(attr => div.setAttribute(attr.name, attr.value));
+      p.replaceWith(div);
+    }
+  });
+})();
+</script>
+{% endblock %}
