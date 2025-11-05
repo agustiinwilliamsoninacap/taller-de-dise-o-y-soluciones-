@@ -3,5 +3,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('ventas.urls')),
+    path('', include('mermeladas_django.ventas.urls')),  # <- ruta completa
 ]
