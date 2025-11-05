@@ -4,8 +4,9 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-change-this-in-production'
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ["taller-de-dise-o-y-soluciones--1.onrender.com", "localhost"]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
