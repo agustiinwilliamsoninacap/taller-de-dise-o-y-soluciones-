@@ -15,7 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'ventas',
+    'mermeladas_django.ventas',
 ]
 
 MIDDLEWARE = [
