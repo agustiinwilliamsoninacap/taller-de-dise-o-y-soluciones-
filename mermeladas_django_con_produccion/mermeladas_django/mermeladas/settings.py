@@ -10,11 +10,19 @@ SECRET_KEY = 'django-insecure-change-this-in-production'
 # Configuración de depuración (False en producción)
 DEBUG = False
 
-# Hosts permitidos (Render + local)
-ALLOWED_HOSTS = ["taller-de-dise-o-y-soluciones--1.onrender.com", "localhost"]
+ALLOWED_HOSTS = [
+    "taller-de-dise-o-y-soluciones-1.onrender.com",  # exacto
+    ".onrender.com",                                  # subdominios de Render
+    "localhost",
+    "127.0.0.1",
+]
+CSRF_TRUSTED_ORIGINS = [
+    "https://taller-de-dise-o-y-soluciones-1.onrender.com",
+    "https://*.onrender.com",
 
-# Protección adicional para CSRF en Render
-CSRF_TRUSTED_ORIGINS = ["https://taller-de-dise-o-y-soluciones--1.onrender.com"]
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
