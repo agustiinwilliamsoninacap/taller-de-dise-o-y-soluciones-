@@ -1,13 +1,22 @@
 from pathlib import Path
 import os
 
+# Rutas base del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Clave secreta
 SECRET_KEY = 'django-insecure-change-this-in-production'
+
+# Configuración de depuración (False en producción)
 DEBUG = False
+
+# Hosts permitidos (Render + local)
 ALLOWED_HOSTS = ["taller-de-dise-o-y-soluciones--1.onrender.com", "localhost"]
 
+# Protección adicional para CSRF en Render
+CSRF_TRUSTED_ORIGINS = ["https://taller-de-dise-o-y-soluciones--1.onrender.com"]
 
+# Aplicaciones instaladas
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -15,9 +24,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mermeladas_django.ventas',
+    'mermeladas_django.ventas',  # ruta completa de tu app
 ]
 
+# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -28,26 +38,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'mermeladas.urls'
+# Configuración de URLs y WSGI (usando rutas completas)
+ROOT_URLCONF = 'mermeladas_django.mermeladas.urls'
+WSGI_APPLICATION = 'mermeladas_django.mermeladas.wsgi.application'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'mermeladas.wsgi.application'
-
+# Base de datos
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -55,13 +50,19 @@ DATABASES = {
     }
 }
 
+# Validadores de contraseñas (puedes agregar los predeterminados si deseas)
 AUTH_PASSWORD_VALIDATORS = []
 
+# Configuración regional
 LANGUAGE_CODE = 'es-cl'
 TIME_ZONE = 'America/Santiago'
 USE_I18N = True
 USE_TZ = True
 
+# Archivos estáticos
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # importante para Render
+
+# Tipo de campo automático
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
