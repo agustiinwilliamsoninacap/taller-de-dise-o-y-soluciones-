@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "ventas",
+    "ventas",  # tu app
 ]
 
 # --- Middleware ---
@@ -49,11 +49,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# --- URLs / WSGI (ojo: SIN prefijo mermeladas_django) ---
+# --- URLs / WSGI ---
 ROOT_URLCONF = "mermeladas.urls"
 WSGI_APPLICATION = "mermeladas.wsgi.application"
-# Si usas ASGI:
-# ASGI_APPLICATION = "mermeladas.asgi.application"
 
 # --- Templates ---
 TEMPLATES = [
@@ -73,16 +71,23 @@ TEMPLATES = [
 ]
 
 # --- Base de datos ---
-# Usa DATABASE_URL de Render si está definida; si no, cae a SQLite
+# Usa PostgreSQL si existe DATABASE_URL; si no, cae a SQLite.
 DATABASES = {
     "default": dj_database_url.config(
         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        ssl_require=True # Render pone RENDER=1
+        conn_max_age=600,  # para producción
     )
 }
 
-# --- Locale ---
+# Si el motor es Postgres, forzamos SSL solo en ese caso
+if DATABASES["default"]["ENGINE"] in (
+    "django.db.backends.postgresql",
+    "django.db.backends.postgresql_psycopg2",
+):
+    DATABASES["default"].setdefault("OPTIONS", {})
+    DATABASES["default"]["OPTIONS"]["sslmode"] = "require"
+
+# --- Localización ---
 LANGUAGE_CODE = "es-cl"
 TIME_ZONE = "America/Santiago"
 USE_I18N = True
