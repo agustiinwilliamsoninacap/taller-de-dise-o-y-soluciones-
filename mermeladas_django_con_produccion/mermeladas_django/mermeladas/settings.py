@@ -1,100 +1,111 @@
 from pathlib import Path
 import os
+import dj_database_url
 
+# --- Paths / Core ---
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-change-this-in-production"
-DEBUG = False
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-change-this-in-production")
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
+# --- Hosts & CSRF (Render) ---
 ALLOWED_HOSTS = [
-    ".onrender.com",                               # todos los subdominios de Render
-        "taller-de-dise-o-y-soluciones-1.onrender.com",   # tu URL actual
-            "taller-de-dise-o-y-soluciones--1.onrender.com",  # por si tu servicio usa doble guion
-                "localhost", "127.0.0.1",
-                ]
+    ".onrender.com",
+    "taller-de-dise-o-y-soluciones-1.onrender.com",
+    "taller-de-dise-o-y-soluciones--1.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
-                CSRF_TRUSTED_ORIGINS = [
-                    "https://taller-de-dise-o-y-soluciones-1.onrender.com",
-                        "https://taller-de-dise-o-y-soluciones--1.onrender.com",
-                            "https://*.onrender.com",
-                            ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://taller-de-dise-o-y-soluciones-1.onrender.com",
+    "https://taller-de-dise-o-y-soluciones--1.onrender.com",
+    "https://*.onrender.com",
+]
 
-                            SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-                            INSTALLED_APPS = [
-                                "whitenoise.runserver_nostatic",   # antes que staticfiles (mejor DX)
-                                    "django.contrib.admin",
-                                        "django.contrib.auth",
-                                            "django.contrib.contenttypes",
-                                                "django.contrib.sessions",
-                                                    "django.contrib.messages",
-                                                        "django.contrib.staticfiles",
-                                                            "ventas",
-                                                            ]
+# --- Apps ---
+INSTALLED_APPS = [
+    "whitenoise.runserver_nostatic",  # antes que staticfiles
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "ventas",
+]
 
-                                                            MIDDLEWARE = [
-                                                                "django.middleware.security.SecurityMiddleware",
-                                                                    "whitenoise.middleware.WhiteNoiseMiddleware",  # servir estáticos en Render
-                                                                        "django.contrib.sessions.middleware.SessionMiddleware",
-                                                                            "django.middleware.common.CommonMiddleware",
-                                                                                "django.middleware.csrf.CsrfViewMiddleware",
-                                                                                    "django.contrib.auth.middleware.AuthenticationMiddleware",
-                                                                                        "django.contrib.messages.middleware.MessageMiddleware",
-                                                                                            "django.middleware.clickjacking.XFrameOptionsMiddleware",
-                                                                                            ]
+# --- Middleware ---
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # servir estáticos en Render
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
 
-                                                                                            ROOT_URLCONF = "mermeladas_django.mermeladas.urls"
-                                                                                            WSGI_APPLICATION = "mermeladas_django.mermeladas.wsgi.application"
+# --- URLs / WSGI (ojo: SIN prefijo mermeladas_django) ---
+ROOT_URLCONF = "mermeladas.urls"
+WSGI_APPLICATION = "mermeladas.wsgi.application"
+# Si usas ASGI:
+# ASGI_APPLICATION = "mermeladas.asgi.application"
 
-                                                                                            TEMPLATES = [
-                                                                                                {
-                                                                                                        "BACKEND": "django.template.backends.django.DjangoTemplates",
-                                                                                                                "DIRS": [BASE_DIR / "templates"],  # si tienes carpeta templates global
-                                                                                                                        "APP_DIRS": True,
-                                                                                                                                "OPTIONS": {
-                                                                                                                                            "context_processors": [
-                                                                                                                                                            "django.template.context_processors.debug",
-                                                                                                                                                                            "django.template.context_processors.request",
-                                                                                                                                                                                            "django.contrib.auth.context_processors.auth",
-                                                                                                                                                                                                            "django.contrib.messages.context_processors.messages",
-                                                                                                                                                                                                                        ],
-                                                                                                                                                                                                                                },
-                                                                                                                                                                                                                                    },
-                                                                                                                                                                                                                                    ]
+# --- Templates ---
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],  # opcional
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+            ],
+        },
+    },
+]
 
-                                                                                                                                                                                                                                    DATABASES = {
-                                                                                                                                                                                                                                        "default": {
-                                                                                                                                                                                                                                                "ENGINE": "django.db.backends.sqlite3",
-                                                                                                                                                                                                                                                        "NAME": BASE_DIR / "db.sqlite3",
-                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                            }
+# --- Base de datos ---
+# Usa DATABASE_URL de Render si está definida; si no, cae a SQLite
+DATABASES = {
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        ssl_require=bool(os.environ.get("RENDER")),  # Render pone RENDER=1
+    )
+}
 
-                                                                                                                                                                                                                                                            AUTH_PASSWORD_VALIDATORS = []  # agrega validadores si los necesitas
+# --- Locale ---
+LANGUAGE_CODE = "es-cl"
+TIME_ZONE = "America/Santiago"
+USE_I18N = True
+USE_TZ = True
 
-                                                                                                                                                                                                                                                            LANGUAGE_CODE = "es-cl"
-                                                                                                                                                                                                                                                            TIME_ZONE = "America/Santiago"
-                                                                                                                                                                                                                                                            USE_I18N = True
-                                                                                                                                                                                                                                                            USE_TZ = True
+# --- Archivos estáticos ---
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
-                                                                                                                                                                                                                                                            # Archivos estáticos
-                                                                                                                                                                                                                                                            STATIC_URL = "static/"
-                                                                                                                                                                                                                                                            STATICFILES_DIRS = [BASE_DIR / "static"] if (BASE_DIR / "static").exists() else []
-                                                                                                                                                                                                                                                            STATIC_ROOT = BASE_DIR / "staticfiles"   # collectstatic
+# WhiteNoise (compresión + manifest)
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
-                                                                                                                                                                                                                                                            # WhiteNoise: comprimir y añadir manifiesto (mejores headers)
-                                                                                                                                                                                                                                                            STORAGES = {
-                                                                                                                                                                                                                                                                "staticfiles": {
-                                                                                                                                                                                                                                                                        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-                                                                                                                                                                                                                                                                            },
-                                                                                                                                                                                                                                                                            }
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-                                                                                                                                                                                                                                                                            DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-                                                                                                                                                                                                                                                                            # log a consola (para ver tracebacks reales en Render)
-                                                                                                                                                                                                                                                                            LOGGING = {
-                                                                                                                                                                                                                                                                                "version": 1,
-                                                                                                                                                                                                                                                                                    "disable_existing_loggers": False,
-                                                                                                                                                                                                                                                                                        "handlers": {"console": {"class": "logging.StreamHandler"}},
-                                                                                                                                                                                                                                                                                            "root": {"handlers": ["console"], "level": "ERROR"},
-                                                                                                                                                                                                                                                                                            }
-                                                                                                                                                                                                                                                                                            
+# --- Logging a consola (útil en Render) ---
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "ERROR"},
+}
