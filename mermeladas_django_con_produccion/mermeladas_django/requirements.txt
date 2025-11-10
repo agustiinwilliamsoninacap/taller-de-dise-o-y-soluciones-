@@ -1,4 +1,4 @@
 Django>=5.0,<6.0
-gunicorn
+reportlab>=4.0
 
 
