@@ -29,7 +29,7 @@ ALLOWED_HOSTS = [
                                                 "django.contrib.sessions",
                                                     "django.contrib.messages",
                                                         "django.contrib.staticfiles",
-                                                            "mermeladas_django.ventas",
+                                                            "ventas",
                                                             ]
 
                                                             MIDDLEWARE = [
