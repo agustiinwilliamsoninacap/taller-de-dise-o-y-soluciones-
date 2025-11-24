@@ -4,12 +4,7 @@ Este repositorio alberga el proyecto final para la asignatura "Taller de Diseño
 
 ## 📝 Descripción del Proyecto
 
-*(Esta es la sección más importante. Reemplaza este texto con tu descripción.)*
 
-**Ejemplo:**
-"Esta aplicación web sirve como un sistema para la gestión de producción y venta de mermeladas artesanales. Permite a los administradores registrar nuevos productos (sabores), gestionar el inventario disponible, y procesar pedidos de clientes. El objetivo es centralizar la operación del negocio en una plataforma digital."
-
----
 
 ## ✨ Características Principales
 
