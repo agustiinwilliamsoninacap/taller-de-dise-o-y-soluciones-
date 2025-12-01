@@ -1,74 +1,102 @@
 {% extends 'base.html' %}
 {% block title %}Cliente{% endblock %}
 
-{% block page_title %}
-  {% if form.instance.pk %}
-    <i class="bi bi-pencil-square me-2"></i>Editar cliente
-  {% else %}
-    <i class="bi bi-person-plus me-2"></i>Crear cliente
-  {% endif %}
-{% endblock %}
-
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-lg-8 col-xl-6">
-    <div class="card shadow-sm border-0">
-      <div class="card-body">
-        <form method="post">
-          {% csrf_token %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
 
-          {{ form.as_p }}
+      <div class="card shadow-lg border-0 rounded-3">
 
-          <div class="mt-4">
-            <button class="btn btn-primary">
-              <i class="bi bi-save me-1"></i>Guardar
-            </button>
-            <a href="{% url 'clientes_list' %}" class="btn btn-secondary">
-              <i class="bi bi-arrow-left me-1"></i>Volver
-            </a>
-          </div>
-        </form>
+        <div class="card-header bg-primary text-white p-4 rounded-top-3">
+          <h4 class="mb-0 fw-bold d-flex align-items-center">
+            {% if form.instance.pk %}
+              <i class="bi bi-pencil-square me-3 fs-4"></i>
+              <span>Editar Cliente</span>
+            {% else %}
+              <i class="bi bi-person-plus-fill me-3 fs-4"></i>
+              <span>Nuevo Cliente</span>
+            {% endif %}
+          </h4>
+        </div>
+
+        <div class="card-body p-4 bg-light-subtle">
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-wrapper">
+                {{ form.as_p }}
+            </div>
+
+            <hr class="my-4 text-muted">
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="{% url 'clientes_list' %}" class="btn btn-outline-secondary px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-2"></i>Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm">
+                <i class="bi bi-check-lg me-2"></i>Guardar Cambios
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
 
 <script>
-(function() {
-  document.querySelectorAll('form > div.card-body p').forEach(p => {
-    const label = p.querySelector('label');
-    const input = p.querySelector('input, select, textarea');
+  /* Tu script original optimizado para estilos modernos */
+  document.addEventListener("DOMContentLoaded", function() {
+    const formParagraphs = document.querySelectorAll('.form-wrapper p');
 
-    if (label && input) {
-      p.classList.add('mb-3');
-      label.classList.add('form-label');
+    formParagraphs.forEach(p => {
+      const label = p.querySelector('label');
+      const input = p.querySelector('input, select, textarea');
 
-      if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
-        if (input.tagName === 'SELECT') {
-          input.classList.add('form-select');
-        } else {
-          input.classList.add('form-control');
+      if (label && input) {
+        // Envolver en un div limpio
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'mb-3'; // Margen inferior Bootstrap
+
+        // Estilar Label
+        label.className = 'form-label fw-semibold text-secondary small text-uppercase ls-1';
+        label.style.letterSpacing = '0.5px';
+
+        // Estilar Inputs
+        if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
+          input.classList.add(input.tagName === 'SELECT' ? 'form-select' : 'form-control');
+          input.classList.add('p-2'); // Un poco más de padding interno
         }
-      }
 
-      const error = p.querySelector('.errorlist');
-      if (error) {
-        error.querySelectorAll('li').forEach(li => {
+        if (input.type === 'checkbox') {
+            wrapperDiv.className = 'form-check mb-3';
+            input.className = 'form-check-input';
+            label.className = 'form-check-label';
+            // Para checkboxes, el input va antes del label
+            wrapperDiv.appendChild(input);
+            wrapperDiv.appendChild(label);
+        } else {
+            wrapperDiv.appendChild(label);
+            wrapperDiv.appendChild(input);
+        }
+
+        // Manejo de Errores
+        const errorList = p.querySelector('.errorlist');
+        if (errorList) {
+          input.classList.add('is-invalid');
           const errorDiv = document.createElement('div');
-          errorDiv.classList.add('invalid-feedback', 'd-block');
-          errorDiv.textContent = li.textContent;
-          input.after(errorDiv);
-        });
-        input.classList.add('is-invalid');
-        error.remove();
-      }
+          errorDiv.className = 'invalid-feedback d-block fw-bold';
+          // Extraer solo el texto del error
+          errorDiv.textContent = errorList.querySelector('li').textContent;
+          wrapperDiv.appendChild(errorDiv);
+        }
 
-      const div = document.createElement('div');
-      div.innerHTML = p.innerHTML;
-      Array.from(p.attributes).forEach(attr => div.setAttribute(attr.name, attr.value));
-      p.replaceWith(div);
-    }
+        // Reemplazar el párrafo original <p> con nuestro nuevo <div>
+        p.replaceWith(wrapperDiv);
+      }
+    });
   });
-})();
 </script>
 {% endblock %}

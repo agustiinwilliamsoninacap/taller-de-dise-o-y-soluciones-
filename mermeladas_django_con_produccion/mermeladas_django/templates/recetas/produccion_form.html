@@ -1,19 +1,152 @@
 {% extends 'base.html' %}
-{% block title %}Producir desde receta{% endblock %}
+{% block title %}Orden de Producción{% endblock %}
+
 {% block content %}
-<h2>Producir desde receta: {{ receta.nombre }}</h2>
-<form method="post">{% csrf_token %}
-  <div class="row">
-    <div class="col-md-6">
-      <div class="card mb-3">
-        <div class="card-body">
-          {{ form.as_p }}
-          <p class="text-muted">Se consumirán las materias primas según la receta × multiplicador y se creará un <strong>lote</strong> para FEFO.</p>
+<div class="container py-5">
+  <div class="row justify-content-center">
+
+    <div class="col-lg-7">
+      <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
+
+        <div class="card-header text-white p-4" style="background: linear-gradient(135deg, #6f42c1 0%, #4e2a8f 100%);">
+          <h5 class="text-uppercase mb-1 opacity-75 small ls-2">Orden de Manufactura</h5>
+          <h2 class="fw-bold mb-0">
+            <i class="bi bi-gear-wide-connected me-2"></i>Producción
+          </h2>
+        </div>
+
+        <div class="card-body p-4 bg-light-subtle">
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-wrapper">
+                {{ form.as_p }}
+            </div>
+
+            <div class="alert alert-warning border-0 shadow-sm d-flex align-items-start mt-4" role="alert">
+                <i class="bi bi-info-circle-fill fs-4 me-3 mt-1"></i>
+                <div>
+                    <h6 class="fw-bold alert-heading">Impacto en Inventario</h6>
+                    <p class="mb-0 small text-muted">
+                        Al confirmar, se descontarán automáticamente los insumos del stock y se generará un nuevo <strong>Lote con fecha de vencimiento</strong> (FEFO) para el producto final.
+                    </p>
+                </div>
+            </div>
+
+            <hr class="my-4 text-muted opacity-25">
+
+            <div class="d-flex gap-2">
+                <a href="{% url 'receta_detail' receta.pk %}" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                    <i class="bi bi-arrow-left me-2"></i>Cancelar
+                </a>
+                <button type="submit" class="btn btn-success btn-lg rounded-pill w-100 shadow fw-bold">
+                    <i class="bi bi-rocket-takeoff-fill me-2"></i>REGISTRAR PRODUCCIÓN
+                </button>
+            </div>
+          </form>
         </div>
       </div>
-      <button class="btn btn-success">Registrar producción</button>
-      <a href="{% url 'receta_detail' receta.pk %}" class="btn btn-secondary">Volver</a>
     </div>
+
+    <div class="col-lg-5 mt-4 mt-lg-0">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4 text-center">
+                <h6 class="text-uppercase text-muted fw-bold small mb-3">Estás produciendo</h6>
+
+                <div class="mb-3">
+                    <span class="d-inline-block p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-basket3-fill" style="font-size: 3rem;"></i>
+                    </span>
+                </div>
+
+                <h3 class="fw-bold text-dark">{{ receta.producto_final }}</h3>
+                <p class="text-muted">Según receta: <strong>{{ receta.nombre }}</strong></p>
+
+                <div class="bg-light rounded-3 p-3 mt-4 text-start">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary small fw-bold text-uppercase">Rendimiento Base</span>
+                        <span class="fw-bold text-dark">{{ receta.rendimiento_unidades|floatformat:0 }} Unidades/Lote</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-secondary small fw-bold text-uppercase">Costo Est. Lote</span>
+                        <span class="fw-bold text-dark font-monospace">${{ receta.costo_estandar|floatformat:0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 bg-dark text-white overflow-hidden">
+            <div class="card-body p-4 position-relative">
+                <i class="bi bi-boxes position-absolute top-50 end-0 translate-middle-y me-n3 opacity-10" style="font-size: 6rem;"></i>
+                <h5 class="fw-bold"><i class="bi bi-activity me-2"></i>Flujo de Stock</h5>
+                <ul class="list-unstyled mt-3 mb-0 small opacity-75">
+                    <li class="mb-2"><i class="bi bi-dash-circle text-danger me-2"></i>Descuenta Materia Prima</li>
+                    <li class="mb-2"><i class="bi bi-plus-circle text-success me-2"></i>Aumenta Producto Terminado</li>
+                    <li><i class="bi bi-calendar-check text-warning me-2"></i>Asigna Vencimiento</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
   </div>
-</form>
-{% endblock %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const formParagraphs = document.querySelectorAll('.form-wrapper p');
+
+    formParagraphs.forEach(p => {
+      const label = p.querySelector('label');
+      const input = p.querySelector('input, select, textarea');
+
+      if (label && input) {
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'mb-4'; // Más espaciado para este form importante
+
+        label.className = 'form-label fw-bold text-dark small text-uppercase';
+
+        if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
+          input.classList.add(input.tagName === 'SELECT' ? 'form-select' : 'form-control');
+          input.classList.add('form-control-lg'); // Inputs grandes
+          input.classList.add('p-3');
+
+          // --- CORRECCIÓN: Limpiar decimales en inputs del formulario ---
+          if (input.value && (input.value.endsWith('.0') || input.value.endsWith(',0'))) {
+             let val = parseFloat(input.value.replace(',', '.'));
+             if (Number.isInteger(val)) {
+                input.value = val;
+             }
+          }
+        }
+
+        // Manejo específico para fechas (si usas DateInput)
+        if (input.type === 'date' || input.type === 'datetime-local') {
+            input.style.appearance = 'none';
+        }
+
+        const errorList = p.querySelector('.errorlist');
+        if (errorList) {
+          input.classList.add('is-invalid');
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'invalid-feedback d-block fw-bold mt-2';
+          errorDiv.textContent = errorList.querySelector('li').textContent;
+          wrapperDiv.appendChild(errorDiv);
+        }
+
+        wrapperDiv.appendChild(label);
+        wrapperDiv.appendChild(input);
+
+        // Agregar texto de ayuda visual si es el campo de Cantidad
+        if (input.name && input.name.includes('cantidad') || label.textContent.toLowerCase().includes('cantidad') || label.textContent.toLowerCase().includes('multiplicador')) {
+             const helpText = document.createElement('div');
+             helpText.className = 'form-text mt-1';
+             helpText.innerHTML = '<i class="bi bi-arrow-return-right me-1"></i>Indica cuántas veces ejecutarás la receta (Lotes).';
+             wrapperDiv.appendChild(helpText);
+        }
+
+        p.replaceWith(wrapperDiv);
+      }
+    });
+  });
+</script>
+{% endblock 

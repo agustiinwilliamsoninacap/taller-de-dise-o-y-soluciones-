@@ -1,89 +1,161 @@
 {% extends 'base.html' %}
-{% block title %}Receta{% endblock %}
-{% block content %}
-<h2>{{ form.instance.pk|yesno:"Editar receta,Nueva receta" }}</h2>
-{% if form.errors or formset.non_form_errors %}
-<div class="alert alert-danger">
-  <strong>Revisa los errores del formulario:</strong>
-  {{ form.non_field_errors }}
-  {{ formset.non_form_errors }}
-</div>
-{% endif %}
+{% block title %}{{ form.instance.pk|yesno:"Editar,Nueva" }} Receta{% endblock %}
 
-<form method="post">{% csrf_token %}
-  <div class="card mb-3">
-    <div class="card-body">
-      {{ form.as_p }}
+{% block content %}
+<div class="container mt-5 mb-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+
+      <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+        <div class="card-header p-4 text-white" style="background: linear-gradient(135deg, #6f42c1 0%, #59359a 100%);">
+          <h4 class="mb-0 fw-bold d-flex align-items-center">
+            {% if form.instance.pk %}
+              <i class="bi bi-journal-check me-3 fs-4"></i>
+              <span>Editar Receta Maestra</span>
+            {% else %}
+              <i class="bi bi-journal-plus me-3 fs-4"></i>
+              <span>Nueva Receta Maestra</span>
+            {% endif %}
+          </h4>
+        </div>
+
+        <div class="card-body p-4 bg-light-subtle">
+
+          {% if form.errors or formset.non_form_errors %}
+          <div class="alert alert-danger shadow-sm border-0 rounded-3 mb-4">
+            <h6 class="alert-heading fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Atención:</h6>
+            <div class="small">
+                {{ form.non_field_errors }}
+                {{ formset.non_form_errors }}
+            </div>
+          </div>
+          {% endif %}
+
+          <form method="post" id="receta-form" novalidate>
+            {% csrf_token %}
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h6 class="text-uppercase text-muted fw-bold mb-3 small ls-1">Información General</h6>
+                    <div class="form-wrapper">
+                        {{ form.as_p }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3 px-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="text-uppercase text-muted fw-bold mb-0 small ls-1">Lista de Ingredientes</h6>
+                        <span class="badge bg-purple-subtle text-purple border rounded-pill">Fórmula</span>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    {{ formset.management_form }}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tabla-insumos">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold border-0" style="min-width: 200px;">Materia Prima</th>
+                                    <th class="py-3 text-secondary text-uppercase small fw-bold border-0" style="width: 200px;">Cantidad Requerida</th>
+                                    <th class="pe-4 py-3 text-end text-secondary text-uppercase small fw-bold border-0" style="width: 100px;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="formset-body">
+                                {% for f in formset %}
+                                <tr class="insumo-row">
+                                    <td class="ps-4 border-bottom-0">
+                                        {{ f.id }}
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-box-seam"></i></span>
+                                            {{ f.materia_prima }}
+                                        </div>
+                                        {% if f.materia_prima.errors %}
+                                            <div class="text-danger small mt-1">{{ f.materia_prima.errors }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <div class="input-group input-group-sm">
+                                            {{ f.cantidad }}
+                                            <span class="input-group-text bg-light fw-bold text-muted unidad-badge" style="min-width: 60px; justify-content: center;">-</span>
+                                        </div>
+                                        {% if f.cantidad.errors %}
+                                            <div class="text-danger small mt-1">{{ f.cantidad.errors }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-4 text-end border-bottom-0">
+                                        <span class="d-none">{{ f.DELETE }}</span>
+                                        <button type="button" class="btn btn-outline-danger btn-sm border-0 rounded-circle btn-remove" title="Quitar ingrediente" style="width: 32px; height: 32px;">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-3 bg-light border-top">
+                        <button id="add-row-producto" type="button" class="btn btn-outline-primary w-100 border-dashed fw-bold py-2">
+                            <i class="bi bi-plus-circle me-2"></i>Agregar otro ingrediente
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end pt-3">
+              <a href="{% url 'recetas_list' %}" class="btn btn-outline-secondary px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-2"></i>Cancelar
+              </a>
+              <button type="submit" class="btn btn-primary px-5 rounded-pill shadow-sm" style="background-color: #6f42c1; border-color: #6f42c1;">
+                <i class="bi bi-save me-2"></i>Guardar Receta
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
     </div>
   </div>
-
-  <h5>Ingredientes</h5>
-
-  {{ formset.management_form }}
-  <table class="table" id="tabla-insumos">
-    <thead>
-      <tr>
-        <th>Materia prima</th>
-        <th style="width:220px">Cantidad</th>
-        <th style="width:120px">Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="formset-body">
-      {% for f in formset %}
-      <tr class="insumo-row">
-        <td>
-          {{ f.id }} {{ f.materia_prima }}
-        </td>
-        <td>
-          <div class="d-flex gap-2 align-items-center">
-            {{ f.cantidad }}
-            <span class="badge bg-secondary unidad-badge"></span>
-          </div>
-        </td>
-        <td>
-          <span class="d-none">{{ f.DELETE }}</span>
-          <button type="button" class="btn btn-sm btn-outline-danger btn-remove">Quitar</button>
-        </td>
-      </tr>
-      {% if f.errors %}
-      <tr><td colspan="3"><div class="text-danger small">{{ f.errors }}</div></td></tr>
-      {% endif %}
-      {% empty %}
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <div class="mb-3">
-    <button id="add-row-producto" type="button" class="btn btn-outline-success">+ Agregar ingrediente</button>
-  </div>
-
-  <button class="btn btn-primary">Guardar</button>
-  <a href="{% url 'recetas_list' %}" class="btn btn-secondary">Volver</a>
-
-</form>
+</div>
 
 <script type="text/template" id="empty-row-template">
   <tr class="insumo-row">
-    <td>
-      {{ formset.empty_form.id }} {{ formset.empty_form.materia_prima }}
-    </td>
-    <td>
-      <div class="d-flex gap-2 align-items-center">
-        {{ formset.empty_form.cantidad }}
-        <span class="badge bg-secondary unidad-badge"></span>
+    <td class="ps-4 border-bottom-0">
+      {{ formset.empty_form.id }}
+      <div class="input-group input-group-sm">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-box-seam"></i></span>
+        {{ formset.empty_form.materia_prima }}
       </div>
     </td>
-    <td>
+    <td class="border-bottom-0">
+      <div class="input-group input-group-sm">
+        {{ formset.empty_form.cantidad }}
+        <span class="input-group-text bg-light fw-bold text-muted unidad-badge" style="min-width: 60px; justify-content: center;">-</span>
+      </div>
+    </td>
+    <td class="pe-4 text-end border-bottom-0">
       <span class="d-none">{{ formset.empty_form.DELETE }}</span>
-      <button type="button" class="btn btn-sm btn-outline-danger btn-remove">Quitar</button>
+      <button type="button" class="btn btn-outline-danger btn-sm border-0 rounded-circle btn-remove" style="width: 32px; height: 32px;">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </td>
   </tr>
 </script>
 
+<style>
+    /* Clases utilitarias personalizadas para este template */
+    .border-dashed { border-style: dashed !important; }
+    .text-purple { color: #6f42c1; }
+    .bg-purple-subtle { background-color: #e9dcf7; }
+</style>
+
 <script>
 (function() {
-  // Mapa idMateriaPrima -> unidad legible (inyectado desde la vista)
-  const UNIDADES = {{ unidades|safe }};
+  const UNIDADES = {{ unidades|safe }}; // Diccionario Python -> JS
 
   const totalFormsInput = document.querySelector('input[name$="-TOTAL_FORMS"]');
   const formsetBody     = document.getElementById('formset-body');
@@ -94,25 +166,39 @@
     const sel   = row.querySelector('select[name$="-materia_prima"]');
     const badge = row.querySelector('.unidad-badge');
     const id    = sel && sel.value;
-    badge.textContent = (id && UNIDADES[id]) ? UNIDADES[id] : "";
+
+    // Si hay ID y existe en el mapa, pintar la unidad. Si no, poner guion.
+    if (id && UNIDADES[id]) {
+        badge.textContent = UNIDADES[id];
+        badge.classList.remove('text-muted');
+        badge.classList.add('text-primary');
+    } else {
+        badge.textContent = "-";
+        badge.classList.add('text-muted');
+    }
   }
 
   function bindRow(row){
-    // Aplicar clases de Bootstrap a los campos del formset
     const selMateria = row.querySelector('select[name$="-materia_prima"]');
     const inputCant = row.querySelector('input[name$="-cantidad"]');
 
-    if (selMateria) selMateria.classList.add('form-select', 'form-select-sm');
-    if (inputCant) inputCant.classList.add('form-control', 'form-control-sm');
+    // Estilos Bootstrap a los inputs
+    if (selMateria) {
+        selMateria.classList.add('form-select', 'border-start-0'); // Border-start-0 para unir con el icono
+    }
+    if (inputCant) {
+        inputCant.classList.add('form-control');
+    }
 
-    // unidad dinámica
+    // Evento cambio de unidad
     row.addEventListener('change', function(e){
       if (e.target.matches('select[name$="-materia_prima"]')) paintUnit(row);
     });
 
-    // botón quitar
+    // Evento borrar fila
     const delChk = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
     const btnDel = row.querySelector('.btn-remove');
+
     if (btnDel) {
       btnDel.addEventListener('click', function(){
         if (delChk) {
@@ -124,7 +210,6 @@
         }
       });
     }
-    // pinta unidad al cargar
     paintUnit(row);
   }
 
@@ -134,7 +219,16 @@
     const tmp   = document.createElement('tbody');
     tmp.innerHTML = html.trim();
     const row   = tmp.firstElementChild;
+
+    // Animación simple de entrada
+    row.style.opacity = '0';
     formsetBody.appendChild(row);
+
+    setTimeout(() => {
+        row.style.transition = 'opacity 0.3s';
+        row.style.opacity = '1';
+    }, 10);
+
     totalFormsInput.value = index + 1;
     bindRow(row);
   }
@@ -144,7 +238,6 @@
     let i = 0;
     rows.forEach(r => {
       if (r.style.display === 'none') return;
-
       r.querySelectorAll('input, select, textarea, label').forEach(el => {
         ['name','id','for'].forEach(attr => {
           if (el.hasAttribute && el.hasAttribute(attr)) {
@@ -157,51 +250,67 @@
     totalFormsInput.value = i;
   }
 
-  // enlaza filas existentes (si hay)
+  // Inicialización
   document.querySelectorAll('tr.insumo-row').forEach(bindRow);
-
-  // botón agregar
   if (addBtn) addBtn.addEventListener('click', addRow);
 })();
 </script>
 
 <script>
-(function() {
-  // Estiliza el formulario principal (el de la tarjeta)
-  document.querySelectorAll('form > .card .card-body p').forEach(p => {
-    const label = p.querySelector('label');
-    const input = p.querySelector('input, select, textarea');
+  document.addEventListener("DOMContentLoaded", function() {
+    const formParagraphs = document.querySelectorAll('.form-wrapper p');
 
-    if (label && input) {
-      p.classList.add('mb-3');
-      label.classList.add('form-label');
+    formParagraphs.forEach(p => {
+      const label = p.querySelector('label');
+      const input = p.querySelector('input, select, textarea');
 
-      if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
-        if (input.tagName === 'SELECT') {
-          input.classList.add('form-select');
-        } else {
-          input.classList.add('form-control');
+      if (label && input) {
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'mb-3';
+
+        label.className = 'form-label fw-semibold text-secondary small text-uppercase ls-1';
+        label.style.letterSpacing = '0.5px';
+
+        if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
+          input.classList.add(input.tagName === 'SELECT' ? 'form-select' : 'form-control');
+          input.classList.add('p-2');
+
+          // --- AQUÍ ESTÁ EL TRUCO PARA EL FORMULARIO ---
+          // Si el input es numérico y tiene decimales .0 o ,0, los quitamos visualmente
+          if (input.value && (input.value.endsWith('.0') || input.value.endsWith(',0'))) {
+             let val = parseFloat(input.value.replace(',', '.'));
+             if (Number.isInteger(val)) {
+                input.value = val;
+             }
+          }
         }
-      }
 
-      const error = p.querySelector('.errorlist');
-      if (error) {
-        error.querySelectorAll('li').forEach(li => {
+        // Manejo de Errores
+        const errorList = p.querySelector('.errorlist');
+        if (errorList) {
+          input.classList.add('is-invalid');
           const errorDiv = document.createElement('div');
-          errorDiv.classList.add('invalid-feedback', 'd-block');
-          errorDiv.textContent = li.textContent;
-          input.after(errorDiv);
-        });
-        input.classList.add('is-invalid');
-        error.remove();
-      }
+          errorDiv.className = 'invalid-feedback d-block fw-bold';
+          errorDiv.textContent = errorList.querySelector('li').textContent;
+          wrapperDiv.appendChild(errorDiv);
+        }
 
-      const div = document.createElement('div');
-      div.innerHTML = p.innerHTML;
-      Array.from(p.attributes).forEach(attr => div.setAttribute(attr.name, attr.value));
-      p.replaceWith(div);
-    }
+        // Reemplazar p por div
+        wrapperDiv.appendChild(label);
+        wrapperDiv.appendChild(input);
+        p.replaceWith(wrapperDiv);
+      }
+    });
+
+    // También limpiamos los inputs de la tabla de ingredientes al cargar
+    document.querySelectorAll('input[name$="-cantidad"]').forEach(inp => {
+          if (inp.value && (inp.value.endsWith('.0') || inp.value.endsWith(',0'))) {
+             let val = parseFloat(inp.value.replace(',', '.'));
+             if (Number.isInteger(val)) {
+                inp.value = val;
+             }
+          }
+    });
   });
-})();
 </script>
 {% endblock %}

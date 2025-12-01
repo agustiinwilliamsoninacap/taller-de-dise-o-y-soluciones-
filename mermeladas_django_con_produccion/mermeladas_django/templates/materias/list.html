@@ -1,27 +1,105 @@
 {% extends 'base.html' %}
-{% block title %}Materias primas{% endblock %}
+{% block title %}Inventario de Materias Primas{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2>Materias primas</h2>
-  <a href="{% url 'materia_create' %}" class="btn btn-primary">Nueva materia prima</a>
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1 text-success-emphasis">Inventario de Insumos</h2>
+      <p class="text-muted mb-0">Control de stock y costos unitarios.</p>
+    </div>
+    <a href="{% url 'materia_create' %}" class="btn btn-success btn-lg rounded-pill shadow-sm px-4">
+      <i class="bi bi-plus-lg me-2"></i>Nueva Materia Prima
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-success-subtle text-success-emphasis">
+            <tr>
+              <th class="ps-4 py-3 text-uppercase small fw-bold border-0">Insumo</th>
+              <th class="py-3 text-uppercase small fw-bold border-0">Unidad Medida</th>
+              <th class="py-3 text-uppercase small fw-bold border-0">Costo Unit.</th>
+              <th class="py-3 text-uppercase small fw-bold border-0">Stock Actual</th>
+              <th class="pe-4 py-3 text-end text-uppercase small fw-bold border-0" style="width: 150px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for m in materias %}
+            <tr>
+              <td class="ps-4 py-3">
+                <div class="d-flex align-items-center">
+                  <div class="bg-light text-success rounded p-2 me-3">
+                    <i class="bi bi-box-seam"></i>
+                  </div>
+                  <span class="fw-bold text-dark">{{ m.nombre }}</span>
+                </div>
+              </td>
+
+              <td>
+                <span class="badge bg-light text-secondary border border-secondary-subtle px-3 py-2 rounded-pill fw-normal">
+                  {{ m.get_unidad_display }}
+                </span>
+              </td>
+
+              <td class="font-monospace text-secondary">
+                <i class="bi bi-currency-dollar small me-1"></i>{{ m.costo_unitario }}
+              </td>
+
+              <td>
+                {% if m.stock <= 5 %}
+                   <span class="d-flex align-items-center text-danger fw-bold">
+                      <i class="bi bi-exclamation-circle-fill me-2"></i>
+                      {{ m.stock|floatformat:0 }}
+                   </span>
+                {% else %}
+                   <span class="fw-bold text-dark fs-5">
+                      {{ m.stock|floatformat:0 }}
+                   </span>
+                {% endif %}
+              </td>
+
+              <td class="pe-4 text-end">
+                <div class="btn-group">
+                  <a href="{% url 'materia_update' m.pk %}" class="btn btn-light text-warning btn-sm border" data-bs-toggle="tooltip" title="Editar precio o stock">
+                    <i class="bi bi-pencil-fill"></i>
+                  </a>
+                  <a href="{% url 'materia_delete' m.pk %}" class="btn btn-light text-danger btn-sm border" data-bs-toggle="tooltip" title="Eliminar del sistema">
+                    <i class="bi bi-trash-fill"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-center py-5">
+                <div class="py-4">
+                  <div class="text-success opacity-25 mb-3">
+                    <i class="bi bi-boxes" style="font-size: 3rem;"></i>
+                  </div>
+                  <h5 class="fw-bold text-secondary">Tu inventario está vacío</h5>
+                  <p class="text-muted mb-4">Registra tus ingredientes (frutas, azúcar, frascos) aquí.</p>
+                  <a href="{% url 'materia_create' %}" class="btn btn-outline-success rounded-pill px-4">
+                    Agregar primer insumo
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer bg-white py-3 border-top-0">
+        <div class="d-flex align-items-center text-muted small">
+            <i class="bi bi-info-circle me-2"></i>
+            <span>El costo unitario debe ser en Pesos Chilenos (CLP).</span>
+        </div>
+    </div>
+  </div>
 </div>
-<table class="table table-striped">
-  <thead><tr><th>Nombre</th><th>Unidad</th><th>Costo (CLP)</th><th>Stock</th><th></th></tr></thead>
-  <tbody>
-  {% for m in materias %}
-    <tr>
-      <td>{{ m.nombre }}</td>
-      <td>{{ m.get_unidad_display }}</td>
-      <td>${{ m.costo_unitario }}</td>
-      <td>{{ m.stock|floatformat:0 }}</td>
-      <td>
-        <a href="{% url 'materia_update' m.pk %}" class="btn btn-sm btn-warning">Editar</a>
-        <a href="{% url 'materia_delete' m.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
-      </td>
-    </tr>
-  {% empty %}
-    <tr><td colspan="5" class="text-center">Sin materias primas</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
 {% endblock %}

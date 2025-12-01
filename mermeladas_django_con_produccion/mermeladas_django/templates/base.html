@@ -3,56 +3,109 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>{% block title %}Dashboard{% endblock %} | Mermeladas</title>
+    <title>{% block title %}Panel{% endblock %} | Duos de Sabores</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
     <style>
-      /* Pequeño ajuste para que los íconos de las alertas se alineen bien */
-      .alert .bi {
-        vertical-align: -0.125em;
+      :root {
+        --bs-font-sans-serif: 'Outfit', sans-serif;
+        --primary-color: #6f42c1; /* Morado marca */
       }
+
+      body {
+        font-family: var(--bs-font-sans-serif);
+        background-color: #f4f6f8; /* Fondo gris suave para resaltar las cards blancas */
+      }
+
+      /* Navbar personalizada */
+      .navbar {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+      }
+
+      .nav-link {
+        font-weight: 500;
+        color: #555;
+        transition: color 0.2s;
+      }
+
+      .nav-link:hover, .nav-link.active {
+        color: var(--primary-color) !important;
+      }
+
+      .dropdown-item:active {
+        background-color: var(--primary-color);
+      }
+
+      /* Utilidades extra que usamos en otras plantillas */
+      .ls-1 { letter-spacing: 1px; }
+
+      /* Ajuste de alertas */
+      .alert {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      }
+      .alert .bi { vertical-align: -0.125em; }
     </style>
   </head>
+
   <body class="d-flex flex-column h-100">
 
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
-      <div class="container-fluid">
-        <a class="navbar-brand fw-bold" href="{% url 'home' %}">
-          <i class="bi bi-journal-richtext me-2"></i>Mermeladas
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top border-bottom shadow-sm py-3">
+      <div class="container">
+        <a class="navbar-brand fw-bold fs-4 d-flex align-items-center" href="{% url 'home' %}">
+  <span class="bg-danger bg-gradient text-white shadow-sm rounded p-1 me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+    <i class="bi bi-basket3-fill fs-5"></i>
+  </span>
+  <span class="fw-bolder" style="letter-spacing: 0.5px;">DUODE<span class="text-danger">SABORES</span></span>
+</a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
           <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-cart-check me-1"></i>Operaciones
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'ventas_list' %}"><i class="bi bi-cash-coin me-2"></i>Ventas</a></li>
-                <li><a class="dropdown-item" href="{% url 'clientes_list' %}"><i class="bi bi-people me-2"></i>Clientes</a></li>
-                <li><a class="dropdown-item" href="{% url 'productos_list' %}"><i class="bi bi-box2 me-2"></i>Productos</a></li>
-              </ul>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-box-seam me-1"></i>Producción
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'recetas_list' %}"><i class="bi bi-book me-2"></i>Recetas</a></li>
-                <li><a class="dropdown-item" href="{% url 'materias_list' %}"><i class="bi bi-bricks me-2"></i>Materias primas</a></li>
-              </ul>
-            </li>
-          </ul>
-          <ul class="navbar-nav">
+          <ul class="navbar-nav ms-auto gap-2">
+
             <li class="nav-item">
-              <a class="nav-link" href="/admin/" title="Administración">
-                <i class="bi bi-gear-fill me-1"></i>Admin
+                <a class="nav-link" href="{% url 'home' %}">Inicio</a>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-box-seam me-1 text-primary"></i>Fábrica
+              </a>
+              <ul class="dropdown-menu border-0 shadow-lg rounded-3 dropdown-menu-end">
+                <li><h6 class="dropdown-header text-uppercase small ls-1">Inventario</h6></li>
+                <li><a class="dropdown-item" href="{% url 'materias_list' %}">Materias Primas (Insumos)</a></li>
+                <li><a class="dropdown-item" href="{% url 'productos_list' %}">Productos Terminados</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header text-uppercase small ls-1">Procesos</h6></li>
+                <li><a class="dropdown-item" href="{% url 'recetas_list' %}">Libro de Recetas</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-shop me-1 text-success"></i>Comercial
+              </a>
+              <ul class="dropdown-menu border-0 shadow-lg rounded-3 dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'clientes_list' %}">Cartera de Clientes</a></li>
+                <li><a class="dropdown-item" href="{% url 'ventas_list' %}">Registro de Ventas</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item d-none d-lg-block border-end mx-2"></li>
+
+            <li class="nav-item">
+              <a class="nav-link text-secondary" href="/admin/" title="Panel de Administración Django">
+                <i class="bi bi-gear-fill"></i>
               </a>
             </li>
           </ul>
@@ -60,35 +113,65 @@
       </div>
     </nav>
 
-    <main class="container my-4">
+    <main class="container py-5 mt-5 flex-shrink-0">
 
-      <h2 class="mb-4">{% block page_title %}{% endblock %}</h2>
+      <div class="mb-4">
+          <h2 class="fw-bold text-dark">{% block page_title %}{% endblock %}</h2>
+      </div>
 
-      {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-          {% if message.tags == 'success' %}
-            <i class="bi bi-check-circle-fill me-2"></i>
-          {% elif message.tags == 'error' %}
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          {% elif message.tags == 'warning' %}
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          {% else %}
-            <i class="bi bi-info-circle-fill me-2"></i>
-          {% endif %}
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      {% if messages %}
+        <div class="mb-4">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show bg-white border-start border-4 border-{{ message.tags|default:'info' }} py-3" role="alert">
+              <div class="d-flex align-items-center">
+                  {% if message.tags == 'success' %}
+                    <i class="bi bi-check-circle-fill text-success fs-4 me-3"></i>
+                  {% elif message.tags == 'error' %}
+                    <i class="bi bi-x-circle-fill text-danger fs-4 me-3"></i>
+                  {% elif message.tags == 'warning' %}
+                    <i class="bi bi-exclamation-triangle-fill text-warning fs-4 me-3"></i>
+                  {% else %}
+                    <i class="bi bi-info-circle-fill text-info fs-4 me-3"></i>
+                  {% endif %}
+                  <div>
+                      <strong>Aviso del sistema:</strong> {{ message }}
+                  </div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
         </div>
-      {% endfor %}
+      {% endif %}
 
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="mt-auto py-3 bg-light border-top">
-      <div class="container text-center text-muted">
-        &copy; {% now "Y" %} Duos De Sabores - Taller de Diseño y Desarrollo de soluciones.
+    <footer class="mt-auto py-4 bg-white border-top">
+      <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center">
+          <div class="col-md-4 d-flex align-items-center">
+            <span class="mb-3 mb-md-0 text-muted small">
+                &copy; {% now "Y" %} <strong>Duos De Sabores</strong><br>
+                Gestión de Producción y Ventas
+            </span>
+          </div>
+
+          <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
+            <li class="ms-3"><span class="text-muted small"></span></li>
+          </ul>
+        </div>
       </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
   </body>
 </html>

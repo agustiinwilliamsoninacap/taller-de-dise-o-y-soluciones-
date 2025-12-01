@@ -1,83 +1,127 @@
 {% extends 'base.html' %}
-{% block title %}Inicio{% endblock %}
-
-{% block page_title %}
-  <i class="bi bi-speedometer2 me-2"></i>Dashboard
-{% endblock %}
-
+{% block title %}Panel de Control{% endblock %}
 
 {% block content %}
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+    .icon-box {
+        width: 64px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+    }
+</style>
 
-<h5 class="mb-3">Resumen General</h5>
-<div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
+<div class="container-fluid py-4">
 
-  <div class="col">
-    <div class="card h-100 shadow-sm border-0">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="fs-1 text-primary me-3">
-            <i class="bi bi-box2"></i>
-          </div>
-          <div>
-            <h6 class="card-title text-muted mb-1">Productos</h6>
-            <div class="fs-3 fw-bold">{{ total_productos }}</div>
-          </div>
+  <div class="mb-5">
+    <h2 class="fw-bold text-dark">Hola, ¡Bienvenido de nuevo! 👋</h2>
+    <p class="text-muted">Aquí tienes el resumen de operaciones de <strong>Duos de Sabores</strong>.</p>
+  </div>
+
+  <div class="row g-4 mb-5">
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 border-start border-4 border-success hover-lift">
+        <div class="card-body p-4 d-flex align-items-center">
+            <div class="icon-box bg-success bg-opacity-10 text-success me-4">
+                <i class="bi bi-currency-dollar fs-2"></i>
+            </div>
+            <div>
+                <span class="d-block text-uppercase text-muted small fw-bold ls-1">Ventas Totales</span>
+                <h3 class="fw-bold mb-0 text-dark">{{ total_ventas }}</h3>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 border-start border-4 border-danger hover-lift">
+        <div class="card-body p-4 d-flex align-items-center">
+            <div class="icon-box bg-danger bg-opacity-10 text-danger me-4">
+                <i class="bi bi-tag-fill fs-2"></i>
+            </div>
+            <div>
+                <span class="d-block text-uppercase text-muted small fw-bold ls-1">Productos en Catálogo</span>
+                <h3 class="fw-bold mb-0 text-dark">{{ total_productos }}</h3>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 h-100 border-start border-4 border-primary hover-lift">
+        <div class="card-body p-4 d-flex align-items-center">
+            <div class="icon-box bg-primary bg-opacity-10 text-primary me-4">
+                <i class="bi bi-people-fill fs-2"></i>
+            </div>
+            <div>
+                <span class="d-block text-uppercase text-muted small fw-bold ls-1">Clientes Activos</span>
+                <h3 class="fw-bold mb-0 text-dark">{{ total_clientes }}</h3>
+            </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="col">
-    <div class="card h-100 shadow-sm border-0">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="fs-1 text-success me-3">
-            <i class="bi bi-people"></i>
+  <div class="row">
+      <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4">
+              <div class="card-header bg-white p-4 border-bottom-0">
+                  <h5 class="fw-bold mb-0"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Accesos Rápidos</h5>
+              </div>
+              <div class="card-body p-4 pt-0">
+                  <div class="row g-3">
+
+                      <div class="col-md-4">
+                          <a href="{% url 'venta_create' %}" class="card bg-success-subtle border-0 text-decoration-none hover-lift h-100">
+                              <div class="card-body text-center p-4">
+                                  <div class="bg-white text-success rounded-circle shadow-sm mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                      <i class="bi bi-cart-plus-fill fs-4"></i>
+                                  </div>
+                                  <h6 class="fw-bold text-success-emphasis">Nueva Venta</h6>
+                                  <small class="text-muted">Registrar salida de productos</small>
+                              </div>
+                          </a>
+                      </div>
+
+                      <div class="col-md-4">
+                          <a href="{% url 'recetas_list' %}" class="card bg-purple-subtle border-0 text-decoration-none hover-lift h-100" style="background-color: #f3e5f5;">
+                              <div class="card-body text-center p-4">
+                                  <div class="bg-white text-purple rounded-circle shadow-sm mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; color: #6f42c1;">
+                                      <i class="bi bi-gear-wide-connected fs-4"></i>
+                                  </div>
+                                  <h6 class="fw-bold" style="color: #4a148c;">Iniciar Producción</h6>
+                                  <small class="text-muted">Producir desde receta</small>
+                              </div>
+                          </a>
+                      </div>
+
+                      <div class="col-md-4">
+                          <a href="{% url 'productos_list' %}" class="card bg-danger-subtle border-0 text-decoration-none hover-lift h-100">
+                              <div class="card-body text-center p-4">
+                                  <div class="bg-white text-danger rounded-circle shadow-sm mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                      <i class="bi bi-box2-heart-fill fs-4"></i>
+                                  </div>
+                                  <h6 class="fw-bold text-danger-emphasis">Ver Stock</h6>
+                                  <small class="text-muted">Consultar disponibilidad</small>
+                              </div>
+                          </a>
+                      </div>
+
+                  </div>
+              </div>
           </div>
-          <div>
-            <h6 class="card-title text-muted mb-1">Clientes</h6>
-            <div class="fs-3 fw-bold">{{ total_clientes }}</div>
-          </div>
-        </div>
       </div>
-    </div>
   </div>
 
-  <div class="col">
-    <div class="card h-100 shadow-sm border-0">
-      <div class="card-body">
-        <div class="d-flex align-items-center">
-          <div class="fs-1 text-info me-3">
-            <i class="bi bi-cash-coin"></i>
-          </div>
-          <div>
-            <h6 class="card-title text-muted mb-1">Ventas</h6>
-            <div class="fs-3 fw-bold">{{ total_ventas }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<h5 class="mb-3">Accesos Rápidos</h5>
-<div class="row">
-  <div class="col-md-6">
-    <div class="card shadow-sm border-0">
-      <div class="card-body p-0">
-        <div class="list-group list-group-flush">
-          <a href="{% url 'venta_create' %}" class="list-group-item list-group-item-action fs-5 py-3">
-            <i class="bi bi-plus-circle-fill me-2 text-success"></i>Registrar Nueva Venta
-          </a>
-          <a href="{% url 'receta_create' %}" class="list-group-item list-group-item-action fs-5 py-3">
-            <i class="bi bi-journal-plus me-2 text-warning"></i>Crear Nueva Receta
-          </a>
-          <a href="{% url 'productos_list' %}" class="list-group-item list-group-item-action fs-5 py-3">
-            <i class="bi bi-search me-2 text-primary"></i>Consultar Productos
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 {% endblock %}

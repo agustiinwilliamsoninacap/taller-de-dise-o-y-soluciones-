@@ -1,10 +1,102 @@
 {% extends 'base.html' %}
-{% block title %}Producto{% endblock %}
+{% block title %}{{ form.instance.pk|yesno:"Editar,Crear" }} Producto{% endblock %}
+
 {% block content %}
-<h2>{{ form.instance.pk|yesno:"Editar producto,Crear producto" }}</h2>
-<form method="post">{% csrf_token %}
-  {{ form.as_p }}
-  <button class="btn btn-primary">Guardar</button>
-  <a href="{% url 'productos_list' %}" class="btn btn-secondary">Volver</a>
-</form>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+
+      <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header bg-danger bg-gradient text-white p-4 rounded-top-4">
+          <h4 class="mb-0 fw-bold d-flex align-items-center">
+            {% if form.instance.pk %}
+              <i class="bi bi-pencil-square me-3 fs-4"></i>
+              <span>Editar Producto</span>
+            {% else %}
+              <i class="bi bi-tag-fill me-3 fs-4"></i>
+              <span>Nuevo Producto</span>
+            {% endif %}
+          </h4>
+        </div>
+
+        <div class="card-body p-4 bg-light-subtle">
+          <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="form-wrapper">
+                {{ form.as_p }}
+            </div>
+
+            <hr class="my-4 text-muted opacity-25">
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="{% url 'productos_list' %}" class="btn btn-outline-secondary px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-2"></i>Cancelar
+              </a>
+              <button type="submit" class="btn btn-danger px-4 rounded-pill shadow-sm">
+                <i class="bi bi-save me-2"></i>Guardar Producto
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const formParagraphs = document.querySelectorAll('.form-wrapper p');
+
+    formParagraphs.forEach(p => {
+      const label = p.querySelector('label');
+      const input = p.querySelector('input, select, textarea');
+
+      if (label && input) {
+        // Wrapper
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.className = 'mb-3';
+
+        // Label
+        label.className = 'form-label fw-semibold text-secondary small text-uppercase ls-1';
+        label.style.letterSpacing = '0.5px';
+
+        // Input styling
+        if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'file') {
+          input.classList.add(input.tagName === 'SELECT' ? 'form-select' : 'form-control');
+          input.classList.add('p-2');
+        }
+
+        // Switch style for checkboxes (Ideal para "Producto Activo" o similar)
+        if (input.type === 'checkbox') {
+            wrapperDiv.className = 'form-check form-switch mb-3 p-3 bg-white border rounded';
+            input.className = 'form-check-input ms-0';
+            label.className = 'form-check-label ms-3 fw-bold text-dark';
+            label.style.textTransform = 'none'; // Quitar mayúsculas forzadas en checkbox
+
+            // Reordenar para switch
+            wrapperDiv.appendChild(input);
+            wrapperDiv.appendChild(label);
+        } else {
+            wrapperDiv.appendChild(label);
+            wrapperDiv.appendChild(input);
+        }
+
+        // Error handling
+        const errorList = p.querySelector('.errorlist');
+        if (errorList) {
+          input.classList.add('is-invalid');
+          const errorDiv = document.createElement('div');
+          errorDiv.className = 'invalid-feedback d-block fw-bold';
+          errorDiv.textContent = errorList.querySelector('li').textContent;
+          wrapperDiv.appendChild(errorDiv);
+        }
+
+        p.replaceWith(wrapperDiv);
+      }
+    });
+  });
+</script>
 {% endblock %}

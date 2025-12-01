@@ -1,23 +1,109 @@
 {% extends 'base.html' %}
-{% block title %}Recetas{% endblock %}
+{% block title %}Libro de Recetas{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2>Recetas</h2>
-  <a href="{% url 'receta_create' %}" class="btn btn-primary">Nueva receta</a>
+<div class="container-fluid py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1" style="color: #6f42c1;">Libro de Recetas</h2>
+      <p class="text-muted mb-0">Fórmulas maestras para la producción.</p>
+    </div>
+    <a href="{% url 'receta_create' %}" class="btn text-white btn-lg rounded-pill shadow-sm px-4" style="background-color: #6f42c1;">
+      <i class="bi bi-plus-lg me-2"></i>Nueva Receta
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead style="background-color: #f3e5f5;">
+            <tr>
+              <th class="ps-4 py-3 text-uppercase small fw-bold text-secondary border-0">Nombre de la Receta</th>
+              <th class="py-3 text-uppercase small fw-bold text-secondary border-0">Producto a Obtener</th>
+              <th class="py-3 text-uppercase small fw-bold text-secondary border-0">Rendimiento</th>
+              <th class="py-3 text-uppercase small fw-bold text-secondary border-0">Complejidad</th>
+              <th class="pe-4 py-3 text-end text-uppercase small fw-bold text-secondary border-0" style="width: 180px;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for r in recetas %}
+            <tr>
+              <td class="ps-4 py-3">
+                <div class="d-flex align-items-center">
+                  <div class="rounded p-2 me-3 text-white" style="background-color: #6f42c1;">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                  </div>
+                  <div>
+                    <a href="{% url 'receta_detail' r.pk %}" class="fw-bold text-dark text-decoration-none stretched-link">
+                        {{ r.nombre }}
+                    </a>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill fw-normal">
+                  <i class="bi bi-tag-fill me-1"></i>{{ r.producto_final }}
+                </span>
+              </td>
+
+              <td>
+                <div class="d-flex align-items-center text-secondary fw-medium">
+                    <i class="bi bi-box-seam me-2"></i>
+                    {{ r.rendimiento_unidades|floatformat:0 }} Unidades
+                </div>
+              </td>
+
+              <td>
+                <span class="d-inline-flex align-items-center text-muted small bg-light px-2 py-1 rounded border">
+                    <i class="bi bi-list-check me-2"></i>
+                    {{ r.items.count }} insumos
+                </span>
+              </td>
+
+              <td class="pe-4 text-end position-relative">
+                <div class="position-relative" style="z-index: 2;"> <a href="{% url 'receta_producir' r.pk %}" class="btn btn-sm btn-success rounded-pill px-3 me-1 shadow-sm fw-bold" title="Iniciar producción">
+                        <i class="bi bi-play-fill me-1"></i>Producir
+                    </a>
+
+                    <div class="btn-group">
+                        <a href="{% url 'receta_update' r.pk %}" class="btn btn-light text-warning btn-sm border" title="Editar receta">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+                    </div>
+
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-center py-5">
+                <div class="py-4">
+                  <div class="text-muted opacity-25 mb-3" style="color: #6f42c1 !important;">
+                    <i class="bi bi-journal-album" style="font-size: 3rem;"></i>
+                  </div>
+                  <h5 class="fw-bold text-secondary">No hay recetas definidas</h5>
+                  <p class="text-muted mb-4">Crea una fórmula para empezar a producir mermeladas.</p>
+                  <a href="{% url 'receta_create' %}" class="btn text-white rounded-pill px-4" style="background-color: #6f42c1;">
+                    Crear primera receta
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-footer bg-white py-3 border-top-0">
+        <div class="d-flex align-items-center text-muted small">
+            <i class="bi bi-lightbulb me-2"></i>
+            <span>Tip: Pulsa "Producir" para descontar stock de insumos y aumentar stock de productos automáticamente.</span>
+        </div>
+    </div>
+  </div>
 </div>
-<table class="table table-striped">
-  <thead><tr><th>Nombre</th><th>Producto final</th><th>Rinde</th><th>Ingredientes</th></tr></thead>
-  <tbody>
-  {% for r in recetas %}
-    <tr>
-      <td><a href="{% url 'receta_detail' r.pk %}">{{ r.nombre }}</a> | <a href="{% url 'receta_update' r.pk %}">Editar</a> | <a href="{% url 'receta_producir' r.pk %}">Producir</a></td>
-      <td>{{ r.producto_final }}</td>
-      <td>{{ r.rendimiento_unidades }}</td>
-      <td>{{ r.items.count }} insumos</td>
-    </tr>
-  {% empty %}
-    <tr><td colspan="4" class="text-center">Sin recetas</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
 {% endblock %}

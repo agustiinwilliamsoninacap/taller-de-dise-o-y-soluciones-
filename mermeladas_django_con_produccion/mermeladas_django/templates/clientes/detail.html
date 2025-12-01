@@ -1,89 +1,178 @@
 {% extends 'base.html' %}
-{% block title %}Detalle cliente{% endblock %}
-
-{% block page_title %}
-  <i class="bi bi-person-vcard me-2"></i>{{ cliente.nombre }}
-{% endblock %}
+{% block title %}Perfil del Cliente{% endblock %}
 
 {% block content %}
-<div class="row g-4">
+<div class="container-fluid py-4">
 
-  <div class="col-lg-4">
-    <div class="card shadow-sm border-0 h-100">
-      <div class="card-header bg-white">
-        <h5 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Datos de Contacto</h5>
-      </div>
-      <div class="card-body">
-        {% if cliente.email %}
-          <p>
-            <strong><i class="bi bi-envelope me-2"></i>Email:</strong><br>
-            {{ cliente.email }}
-          </p>
-        {% endif %}
-        {% if cliente.telefono %}
-          <p>
-            <strong><i class="bi bi-telephone me-2"></i>Teléfono:</strong><br>
-            {{ cliente.telefono }}
-          </p>
-        {% endif %}
-         {% if cliente.direccion %}
-          <p>
-            <strong><i class="bi bi-geo-alt me-2"></i>Dirección:</strong><br>
-            {{ cliente.direccion }}
-          </p>
-        {% endif %}
-      </div>
-      <div class="card-footer text-bg-light">
-        <h6 class="mb-0">Total Gastado:
-          <span class="fw-bold fs-5 float-end">${{ cliente.total_gastado|default:0 }}</span>
-        </h6>
-      </div>
-    </div>
-  </div>
+  <!-- 1. Banner de Cabecera con Perfil -->
+  <div class="card border-0 shadow-sm mb-4 overflow-hidden rounded-4">
+    <div class="card-body p-0">
+      <div class="bg-primary bg-gradient text-white p-4 position-relative">
+        <!-- Decoración de fondo -->
+        <i class="bi bi-person-badge position-absolute top-50 end-0 translate-middle-y me-3 opacity-25" style="font-size: 8rem;"></i>
 
-  <div class="col-lg-8">
-    <div class="card shadow-sm border-0">
-      <div class="card-header bg-white">
-        <h5 class="mb-0"><i class="bi bi-basket me-2"></i>Historial de Compras</h5>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-sm table-hover mb-0">
-            <thead>
-              <tr class="table-light">
-                <th>Fecha</th>
-                <th>Total</th>
-                <th class="text-end">Comprobante</th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for v in ventas %}
-              <tr>
-                <td>{{ v.fecha|date:"d/m/Y H:i" }}</td>
-                <td>${{ v.total }}</td>
-                <td class="text-end">
-                  <a href="{% url 'venta_detail' v.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalle">
-                    <i class="bi bi-search me-1"></i>Ver
-                  </a>
-                  <a href="{% url 'venta_pdf' v.pk %}" target="_blank" class="btn btn-sm btn-outline-danger" title="Ver PDF">
-                    <i class="bi bi-file-earmark-pdf me-1"></i>PDF
-                  </a>
-                </td>
-              </tr>
-            {% empty %}
-              <tr><td colspan="3" class="text-center">Este cliente no tiene compras registradas.</td></tr>
-            {% endfor %}
-            </tbody>
-          </table>
+        <div class="position-relative z-2">
+          <div class="d-flex align-items-center">
+            <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm me-3" style="width: 64px; height: 64px;">
+              <i class="bi bi-person-fill fs-2"></i>
+            </div>
+            <div>
+              <h6 class="text-uppercase text-white-50 mb-1 ls-1 small">Ficha de Cliente</h6>
+              <h2 class="fw-bold mb-0">{{ cliente.nombre }}</h2>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="mt-4">
-  <a href="{% url 'clientes_list' %}" class="btn btn-secondary">
-    <i class="bi bi-arrow-left me-1"></i>Volver a la lista
-  </a>
+  <div class="row g-4">
+    <!-- COLUMNA IZQUIERDA: Información y Estadísticas -->
+    <div class="col-lg-4">
+
+      <!-- Tarjeta de Total Gastado (Highlight) -->
+      <div class="card border-0 shadow-sm mb-4 bg-success-subtle text-success-emphasis rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <p class="mb-0 fw-bold text-uppercase small">Total Gastado</p>
+              <h3 class="fw-bolder mb-0">${{ cliente.total_gastado|default:0 }}</h3>
+            </div>
+            <div class="bg-white bg-opacity-50 p-3 rounded-circle">
+              <i class="bi bi-cash-coin fs-3"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjeta de Datos de Contacto -->
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+          <h5 class="fw-bold text-secondary"><i class="bi bi-info-circle me-2"></i>Información de Contacto</h5>
+        </div>
+        <div class="card-body p-4">
+          <div class="vstack gap-4">
+
+            {% if cliente.email %}
+            <div class="d-flex">
+              <div class="flex-shrink-0">
+                <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <i class="bi bi-envelope"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <small class="text-muted text-uppercase fw-semibold">Email</small>
+                <div class="fw-medium text-dark">{{ cliente.email }}</div>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if cliente.telefono %}
+            <div class="d-flex">
+              <div class="flex-shrink-0">
+                <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <i class="bi bi-telephone"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <small class="text-muted text-uppercase fw-semibold">Teléfono</small>
+                <div class="fw-medium text-dark">{{ cliente.telefono }}</div>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if cliente.direccion %}
+            <div class="d-flex">
+              <div class="flex-shrink-0">
+                <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <i class="bi bi-geo-alt"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1 ms-3">
+                <small class="text-muted text-uppercase fw-semibold">Dirección</small>
+                <div class="fw-medium text-dark">{{ cliente.direccion }}</div>
+              </div>
+            </div>
+            {% endif %}
+
+            {% if not cliente.email and not cliente.telefono and not cliente.direccion %}
+              <div class="alert alert-light border-0 text-center text-muted">
+                <i class="bi bi-exclamation-circle me-2"></i>Sin datos de contacto adicionales.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Historial -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-header bg-white border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold text-secondary mb-0"><i class="bi bi-basket me-2"></i>Historial de Compras</h5>
+          <span class="badge bg-light text-secondary rounded-pill border">{{ ventas|length }} Pedidos</span>
+        </div>
+
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="border-collapse: separate; border-spacing: 0;">
+              <thead class="bg-light">
+                <tr>
+                  <th class="ps-4 py-3 text-secondary text-uppercase small fw-bold border-0">Fecha</th>
+                  <th class="py-3 text-secondary text-uppercase small fw-bold border-0">Total</th>
+                  <th class="pe-4 py-3 text-end text-secondary text-uppercase small fw-bold border-0">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for v in ventas %}
+                <tr>
+                  <td class="ps-4 border-bottom-0">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary-subtle text-primary rounded p-2 me-3">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <span class="fw-medium">{{ v.fecha|date:"d M, Y" }}</span>
+                        <small class="text-muted ms-2">{{ v.fecha|date:"H:i" }}</small>
+                    </div>
+                  </td>
+                  <td class="fw-bold text-dark border-bottom-0 fs-5">
+                    ${{ v.total }}
+                  </td>
+                  <td class="pe-4 text-end border-bottom-0">
+                    <div class="btn-group">
+                        <a href="{% url 'venta_detail' v.pk %}" class="btn btn-light text-primary btn-sm rounded-start-pill px-3" data-bs-toggle="tooltip" title="Ver Detalle">
+                            <i class="bi bi-eye-fill"></i>
+                        </a>
+                        <a href="{% url 'venta_pdf' v.pk %}" target="_blank" class="btn btn-light text-danger btn-sm rounded-end-pill px-3 border-start" data-bs-toggle="tooltip" title="Descargar PDF">
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        </a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center py-5">
+                        <div class="text-muted opacity-50 mb-3">
+                            <i class="bi bi-cart-x" style="font-size: 3rem;"></i>
+                        </div>
+                        <h6 class="fw-bold text-secondary">Aún no hay compras registradas</h6>
+                        <p class="small text-muted">Cuando el cliente realice una compra, aparecerá aquí.</p>
+                    </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón Volver Flotante o al final -->
+  <div class="mt-4 pb-4">
+    <a href="{% url 'clientes_list' %}" class="btn btn-outline-secondary rounded-pill px-4">
+      <i class="bi bi-arrow-left me-2"></i>Volver al listado
+    </a>
+  </div>
 </div>
 {% endblock %}
